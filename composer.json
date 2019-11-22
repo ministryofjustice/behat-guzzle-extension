@@ -16,9 +16,9 @@
     },
     "require": {
         "php": ">=5.3.3",
-        "behat/behat": "~3.0,>=3.0.5",
+        "behat/behat": "^3.5",
         "guzzle/guzzle": ">=3.5",
-        "symfony/config": "^2.2 | ^3.3"
+        "symfony/config": "^3.3 | ^4.0"
     },
     "require-dev": {
         "phpspec/phpspec": "~2.0",
