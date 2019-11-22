@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /**
  * Behat Guzzle Extension
  *
@@ -14,11 +17,14 @@
 namespace Behat\GuzzleExtension\ServiceContainer;
 
 use Behat\Behat\Context\ServiceContainer\ContextExtension;
+use Behat\GuzzleExtension\Context\Initializer\GuzzleAwareInitializer;
 use Behat\Testwork\ServiceContainer\Extension as ExtensionInterface;
 use Behat\Testwork\ServiceContainer\ExtensionManager;
+use Guzzle\Service\Client;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Parameter;
 use Symfony\Component\DependencyInjection\Reference;
 
 /**
@@ -32,7 +38,7 @@ use Symfony\Component\DependencyInjection\Reference;
  */
 class GuzzleExtension implements ExtensionInterface
 {
-    const GUZZLE_CLIENT_ID = 'guzzle.client';
+    public const GUZZLE_CLIENT_ID = 'guzzle.client';
 
     /**
      * {@inheritDoc}
@@ -96,11 +102,11 @@ class GuzzleExtension implements ExtensionInterface
         $container->setDefinition(
             self::GUZZLE_CLIENT_ID,
             new Definition(
-                'Guzzle\Service\Client',
-                array(
-                    'baseUrl' => $container->getParameter('guzzle.base_url'),
-                    'config' => $container->getParameter('guzzle.parameters')
-                )
+                Client::class,
+                [
+                    new Parameter('guzzle.base_url'),
+                    new Parameter('guzzle.parameters'),
+                ]
             )
         );
     }
@@ -116,15 +122,15 @@ class GuzzleExtension implements ExtensionInterface
     private function loadContextInitializer(ContainerBuilder $container)
     {
         $definition = new Definition(
-            'Behat\GuzzleExtension\Context\Initializer\GuzzleAwareInitializer',
-            array(
+            GuzzleAwareInitializer::class,
+            [
                 new Reference(self::GUZZLE_CLIENT_ID),
-                '%guzzle.parameters%',
-            )
+                new Parameter('guzzle.parameters'),
+            ]
         );
         $definition->addTag(
             ContextExtension::INITIALIZER_TAG,
-            array('priority' => 0)
+            ['priority' => 0]
         );
 
         $container->setDefinition('guzzle.context_initializer', $definition);
